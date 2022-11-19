@@ -6,4 +6,5 @@ export class UserCreateDto {
   @IsNotEmpty() @IsString() lastName: string;
   @IsNotEmpty() @IsEmail() email: string;
   @IsNotEmpty() @IsString() role: string;
+  password: any;
 }

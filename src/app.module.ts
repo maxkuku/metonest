@@ -14,6 +14,9 @@ import { UserService } from './user/user.service';
 import { MailModule } from './mail/mail.module';
 import { NewsController } from './news/news.controller';
 import { NewsService } from './news/news.service';
+import { AuthModule } from './auth/auth.module';
+import { APP_GUARD } from '@nestjs/core';
+import { RolesGuard } from './auth/role/roles.guard';
 
 @Module({
   imports: [
@@ -35,6 +38,7 @@ import { NewsService } from './news/news.service';
       entities: [],
       synchronize: false,
     }),
+    AuthModule,
   ],
   controllers: [
     AppController,
@@ -42,6 +46,15 @@ import { NewsService } from './news/news.service';
     CommentsController,
     NewsController,
   ],
-  providers: [AppService, UserService, CommentsService, NewsService],
+  providers: [
+    AppService,
+    UserService,
+    CommentsService,
+    NewsService,
+    {
+      provide: APP_GUARD,
+      useClass: RolesGuard,
+    },
+  ],
 })
 export class AppModule {}

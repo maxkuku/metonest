@@ -3,5 +3,5 @@ export interface UserEntity {
   firstName: string;
   lastName: string;
   email: string;
-  roles: [string];
+  role: [string];
 }

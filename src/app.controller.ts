@@ -1,24 +1,17 @@
-import { Body, Controller, Get, Param, Post, Render } from '@nestjs/common';
-import { AppService } from './app.service';
-import { CreateUserDto, FindOneParams } from './user/create-user.dto';
+import { Controller, Get, Request, Post, UseGuards } from '@nestjs/common';
+import { JwtAuthGuard } from './auth/jwt-auth.guard';
+import { LocalAuthGuard } from './auth/local-auth.guard';
+import { AuthService } from './auth/auth.service';
 
 @Controller()
 export class AppController {
-  constructor(private readonly appService: AppService) {}
-
-  @Get()
-  @Render('index')
-  getHello(): { message: string } {
-    return { message: 'Hello world!' };
+  constructor(private readonly authService: AuthService) {}
+  @UseGuards(LocalAuthGuard)
+  @Post('auth/login')
+  async login(@Request() req) {
+    return this.authService.login(req.user);
   }
-
-  @Get(':id')
-  findOne(@Param() params: FindOneParams): string {
-    return 'This action returns a user';
-  }
-
-  @Post()
-  create(@Body() createUserDto: CreateUserDto): string {
-    return 'This action adds a new user';
+  @UseGuards(JwtAuthGuard) @Get('profile') getProfile(@Request() req) {
+    return req.user;
   }
 }
