@@ -6,13 +6,8 @@ import { UserService } from './user.service';
 export class UserController {
   constructor(private userService: UserService) {}
 
-  // @Get()
-  // async getUser(): Promise<UserEntity> {
-  //   return this.userService.findOne(user);
-  // }
-
-  // @Get('/first')
-  // async getUserFirst(): Promise<string> {
-  //   return this.userService.findOneFirst(user.firstName);
+  // @Get(':id')
+  // async getUser(id): Promise<any> {
+  //   return this.userService.findById({ where: { user: User } });
   // }
 }

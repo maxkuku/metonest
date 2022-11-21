@@ -5,7 +5,11 @@ import { v4 as uuidv4 } from 'uuid';
 export class CommentsService {
   private readonly comments = {};
 
-  async create(idNews: number | string, comment: string): Promise<number> {
+  async create(
+    idNews: number | string,
+    comment: string,
+    userId: number,
+  ): Promise<number> {
     if (!this.comments?.[idNews]) {
       this.comments[idNews] = [];
     }
@@ -13,6 +17,7 @@ export class CommentsService {
     return this.comments[idNews].push({
       comment,
       id: idNews,
+      userId: userId,
     });
   }
 
