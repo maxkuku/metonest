@@ -7,40 +7,40 @@ import {
   OnGatewayDisconnect,
 } from '@nestjs/websockets';
 import * as cookie from 'cookie';
-import { Logger, UseGuards } from '@nestjs/common';
+import { Logger } from '@nestjs/common';
 import { Socket, Server } from 'socket.io';
-import { WsJwtGuard } from '../../auth/ws-jwt.guard';
 import { CommentsService } from './comments.service';
-import { OnEvent } from '@nestjs/event-emitter';
-export type Comment = { message: string; idNews: number };
+import { CommentsEntity } from './comments.entity';
+export type Comment = { message: string; author: string };
 @WebSocketGateway()
 export class SocketCommentsGateway
   implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
 {
-  constructor(private readonly commentsService: CommentsService) {}
+  // создали сервер
   @WebSocketServer() server: Server;
   private logger: Logger = new Logger('AppGateway');
-  @UseGuards(WsJwtGuard)
+  // подписались на сообщения клиентов с типом 'addComment'
   @SubscribeMessage('addComment')
-  async handleMessage(client: Socket, comment: Comment): Promise<void> {
-    const { idNews, message } = comment;
-    // Извлекаем объект пользователя, который установлен в ws-jwt.guard.ts
-    const userId: number = client.data.user.id;
-    // Создаём комментарий
-    const _comment = await this.commentsService.create(idNews, message, userId);
-    // Оповещаем пользователей комнаты о новом комментарии
-    this.server.to(idNews.toString()).emit('newComment', _comment);
+  async handleMessage(client: Socket, comment: CommentsEntity) {
+    // парсим cookie-файлы
+    const cookies = cookie.parse(client.handshake.headers.cookie);
+    // извлекаем id новости
+    const { idNews } = cookies;
+    // создаём/подключаемся к комнате, идентификатором комнаты будет id новости
+    client.join(idNews);
+    // через метод to сообщаем, в какую комнату надо сделать рассылку сообщений с типом 'newComment'
+    this.server.to(idNews).emit('newComment', comment);
   }
-  afterInit(server: Server): void {
+  // событие срабатывает после инициализации сервера
+  afterInit(server: Server) {
     this.logger.log('Init');
   }
-  handleDisconnect(client: Socket): void {
+  // событие срабатывает после каждого отключения клиента
+  handleDisconnect(client: Socket) {
     this.logger.log(`Client disconnected: ${client.id}`);
   }
-  async handleConnection(client: Socket, ...args: any[]): Promise<void> {
-    const { newsId } = client.handshake.query;
-    // После подключения пользователя к веб-сокету, подключаем его в комнату
-    client.join(newsId);
+  // событие срабатывает после каждого подключения клиента
+  handleConnection(client: Socket, ...args: any[]) {
     this.logger.log(`Client connected: ${client.id}`);
   }
 }

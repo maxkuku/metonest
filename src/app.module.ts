@@ -17,6 +17,8 @@ import { NewsService } from './news/news.service';
 import { AuthModule } from './auth/auth.module';
 import { APP_GUARD } from '@nestjs/core';
 import { RolesGuard } from './auth/role/roles.guard';
+import { UsersEntity } from './user/user.entity';
+import { NewsEntity } from './news/news.entity';
 
 @Module({
   imports: [
@@ -28,6 +30,8 @@ import { RolesGuard } from './auth/role/roles.guard';
       rootPath: join(__dirname, '..', './dist'),
     }),
     MailModule,
+    TypeOrmModule.forFeature([NewsEntity]),
+    TypeOrmModule.forFeature([UsersEntity]),
     TypeOrmModule.forRoot({
       type: 'postgres',
       host: 'localhost',
