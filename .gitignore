@@ -4,6 +4,7 @@
 /target
 /metonest.sqlite
 .env
+/.git-cleanup-backup/
 
 # Logs
 logs
