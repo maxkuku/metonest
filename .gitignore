@@ -1,6 +1,10 @@
 # compiled output
 /dist
 /node_modules
+/target
+/metonest.sqlite
+.env
+/.git-cleanup-backup/
 
 # Logs
 logs

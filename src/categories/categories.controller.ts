@@ -1,13 +1,17 @@
-import { Body, Controller, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
 import { CategoriesService } from './categories.service';
 import { CategoriesEntity } from './categories.entity';
 import { Roles } from '../auth/role/roles.decorator';
 import { Role } from '../auth/role/role.enum';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
-@Controller('categories')
+@Controller('api/categories')
 export class CategoriesController {
   constructor(private readonly categoriesService: CategoriesService) {}
+  @Get()
+  findAll(): Promise<CategoriesEntity[]> {
+    return this.categoriesService.findAll();
+  }
   @Post()
   @UseGuards(JwtAuthGuard)
   @Roles(Role.Admin)

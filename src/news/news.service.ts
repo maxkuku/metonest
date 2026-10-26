@@ -15,19 +15,21 @@ export class NewsService {
   }
 
   async findAll(): Promise<NewsEntity[]> {
-    return await this.newsRepository.find({});
+    return await this.newsRepository.find({
+      relations: { user: true, category: true },
+      order: { createdAt: 'DESC' },
+    });
   }
 
-  async findById(id: number): Promise<NewsEntity[]> {
-    return await this.newsRepository.find({
-      where: {
-        id: id,
-      },
+  async findById(id: number): Promise<NewsEntity> {
+    return await this.newsRepository.findOne({
+      where: { id },
+      relations: { user: true, category: true },
     });
   }
 
   async remove(id: number) {
     const _news = await this.findById(id);
-    return await this.newsRepository.remove(_news);
+    if (_news) return await this.newsRepository.remove(_news);
   }
 }

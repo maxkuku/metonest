@@ -1,4 +1,4 @@
-import { NewsEntity } from 'src/news/news.entity';
+import { NewsEntity } from '../news/news.entity';
 
 export const newsTemplate = (news: NewsEntity[]) => {
   if (news?.length === 0) {

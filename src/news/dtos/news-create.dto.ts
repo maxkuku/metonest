@@ -1,10 +1,11 @@
 import {
-  IsDateString,
   IsNotEmpty,
   IsNumber,
+  IsOptional,
   IsString,
   ValidateIf,
 } from 'class-validator';
+import { Type } from 'class-transformer';
 
 export class NewsCreateDto {
   id: number | string;
@@ -21,9 +22,7 @@ export class NewsCreateDto {
   @IsString()
   author: string;
 
-  @IsNumber()
-  authorId: number;
-
+  @Type(() => Number)
   @IsNumber()
   categoryId: number;
 
@@ -31,6 +30,6 @@ export class NewsCreateDto {
   @IsString()
   cover: string;
 
-  @IsString()
+  @IsOptional()
   createdAt: Date | string;
 }

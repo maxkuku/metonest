@@ -1,18 +1,18 @@
-import { Controller, Get } from '@nestjs/common';
-import { UserEntity } from './user.interface';
+import { Body, ConflictException, Controller, Post } from '@nestjs/common';
+import { UserCreateDto } from './dto/user-create.dto';
 import { UserService } from './user.service';
 
-@Controller('user')
+@Controller('api/auth')
 export class UserController {
-  constructor(private userService: UserService) {}
+  constructor(private readonly userService: UserService) {}
 
-  // @Get()
-  // async getUser(): Promise<UserEntity> {
-  //   return this.userService.findOne(user);
-  // }
-
-  // @Get('/first')
-  // async getUserFirst(): Promise<string> {
-  //   return this.userService.findOneFirst(user.firstName);
-  // }
+  @Post('register')
+  async register(@Body() dto: UserCreateDto) {
+    if (await this.userService.findByEmail(dto.email)) {
+      throw new ConflictException('Пользователь с такой почтой уже существует');
+    }
+    const user = await this.userService.create(dto);
+    const { password, ...safeUser } = user;
+    return safeUser;
+  }
 }
