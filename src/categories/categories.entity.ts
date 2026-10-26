@@ -1,4 +1,4 @@
-import { NewsEntity } from 'src/news/news.entity';
+import { NewsEntity } from '../news/news.entity';
 import { Entity, Column, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
 
 @Entity('categories')

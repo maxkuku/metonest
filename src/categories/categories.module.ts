@@ -13,16 +13,11 @@ import { UserController } from '../user/user.controller';
 import { UsersEntity } from '../user/user.entity';
 import { CategoriesService } from '../categories/categories.service';
 import { CategoriesEntity } from './categories.entity';
+import { CategoriesController } from './categories.controller';
 @Module({
-  controllers: [NewsController, CommentsController, UserController],
-  providers: [NewsService, CommentsService, CategoriesService, UserService],
-  imports: [
-    TypeOrmModule.forFeature([NewsEntity]),
-    TypeOrmModule.forFeature([CategoriesEntity]),
-    TypeOrmModule.forFeature([UsersEntity]),
-    forwardRef(() => CommentsModule),
-    forwardRef(() => MailModule),
-    forwardRef(() => UserModule),
-  ],
+  controllers: [CategoriesController],
+  providers: [CategoriesService],
+  imports: [TypeOrmModule.forFeature([CategoriesEntity])],
+  exports: [CategoriesService],
 })
 export class CategoriesModule {}

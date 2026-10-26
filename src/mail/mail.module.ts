@@ -8,10 +8,9 @@ import { MailController } from './mail.controller';
 @Module({
   imports: [
     MailerModule.forRoot({
-      transport:
-        'smtps://redacted@example.com:REMOVED_SMTP_PASSWORD@smtp.mail.ru',
+      transport: process.env.SMTP_URL || 'smtp://localhost:1025',
       defaults: {
-        from: '"NestJS робот" <redacted@example.com>',
+        from: process.env.MAIL_FROM || '"Место" <news@localhost>',
       },
       template: {
         dir: join(__dirname, 'templates'),

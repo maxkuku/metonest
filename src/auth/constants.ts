@@ -1,1 +1,3 @@
-export const jwtConstants = { secret: 'secretKey' };
+export const jwtConstants = {
+  secret: process.env.JWT_SECRET || 'development-only-secret',
+};

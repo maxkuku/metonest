@@ -18,7 +18,7 @@ export class NewsEntity {
   @ManyToOne(() => CategoriesEntity, (category) => category.news)
   category: CategoriesEntity;
   @ManyToOne(() => UsersEntity, (user) => user.news) user: UsersEntity;
-  @CreateDateColumn({ type: 'timestamp' }) createdAt: Date;
-  @UpdateDateColumn({ type: 'timestamp' })
+  @CreateDateColumn({ type: 'datetime' }) createdAt: Date;
+  @UpdateDateColumn({ type: 'datetime' })
   updatedAt: Date;
 }

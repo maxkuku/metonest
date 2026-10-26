@@ -5,6 +5,7 @@ import { News } from '../news/news.interface';
 export class MailService {
   constructor(private readonly mailerService: MailerService) {}
   async sendNewNewsForAdmins(emails: string[], news: News): Promise<void> {
+    if (!process.env.SMTP_URL) return;
     console.log('Отправляются письма о новой новости администрации ресурса');
     for (const email of emails) {
       await this.mailerService
@@ -27,7 +28,7 @@ export class MailService {
     console.log('Отправляется письмо установки');
     // return this.mailerService
     //   .sendMail({
-    //     to: 'admin@example.com',
+    //     to: process.env.ADMIN_EMAIL,
     //     subject: 'Первое тестовое письмо',
     //     template: './test',
     //   })

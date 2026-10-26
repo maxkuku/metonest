@@ -9,6 +9,8 @@ import {
   UploadedFile,
   HttpException,
   HttpStatus,
+  Req,
+  UseGuards,
 } from '@nestjs/common';
 import { newsTemplate } from '../views/newstemplate';
 import { htmlTemplate } from '../views/template';
@@ -17,14 +19,15 @@ import { News } from './news.interface';
 import { NewsService } from './news.service';
 import { NewsIdDto } from './dtos/news-id.dto';
 import { NewsCreateDto } from './dtos/news-create.dto';
-import { FilesInterceptor } from '@nestjs/platform-express';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { HelperFileLoader } from '../utils/HelperFileLoader';
 import { diskStorage } from 'multer';
-import { LoggingInterceptor } from 'src/common/middleware/logger.interceptor';
+import { LoggingInterceptor } from '../common/middleware/logger.interceptor';
 import { MailService } from '../mail/mail.service';
 import { NewsEntity } from './news.entity';
-import { UserService } from 'src/user/user.service';
-import { CategoriesService } from 'src/categories/categories.service';
+import { UserService } from '../user/user.service';
+import { CategoriesService } from '../categories/categories.service';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
 const PATH_NEWS = '/news-static/';
 const helperFileLoader = new HelperFileLoader();
@@ -33,12 +36,12 @@ helperFileLoader.path = PATH_NEWS;
 const imageFileFilter = (req, file, callback) => {
   const fileExtension = file.originalname.split('.').reverse()[0];
   if (!fileExtension || !fileExtension.match(/(jpg|jpeg|png|gif)$/)) {
-    callback(new Error('Excepted image'), false);
+    return callback(new Error('Ожидается изображение'), false);
   }
   callback(null, true);
 };
 
-@Controller('news')
+@Controller('api/news')
 @UseInterceptors(LoggingInterceptor)
 export class NewsController {
   constructor(
@@ -57,14 +60,15 @@ export class NewsController {
   @Get(':id')
   async findById(
     @Param() params: NewsIdDto,
-  ): Promise<NewsEntity[] | undefined> {
+  ): Promise<NewsEntity | undefined> {
     return this.newsService.findById(params.id);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Delete(':id')
   async remove(@Param() params: NewsIdDto): Promise<boolean> {
-    this.newsService.remove(params.id);
-    this.commentService.removeAll(params.id);
+    await this.newsService.remove(params.id);
+    await this.commentService.removeAll(params.id);
     return true;
   }
 
@@ -76,11 +80,12 @@ export class NewsController {
 
   @Post('upload')
   @UseInterceptors(
-    FilesInterceptor('file', 1, {
+    FileInterceptor('file', {
       storage: diskStorage({
         destination: helperFileLoader.destinationPath,
         filename: helperFileLoader.customFileName,
       }),
+      fileFilter: imageFileFilter,
     }),
   )
   uploadFile(@UploadedFile() file: Express.Multer.File) {
@@ -89,19 +94,22 @@ export class NewsController {
 
   @Post()
   @UseInterceptors(
-    FilesInterceptor('cover', 1, {
+    FileInterceptor('cover', {
       storage: diskStorage({
         destination: helperFileLoader.destinationPath,
         filename: helperFileLoader.customFileName,
       }),
+      fileFilter: imageFileFilter,
     }),
   )
+  @UseGuards(JwtAuthGuard)
   async create(
     @Body() news: NewsCreateDto,
     @UploadedFile() cover: Express.Multer.File,
+    @Req() request,
   ) {
     // Поиск пользователя по его ID
-    const _user = await this.userService.findById(news.authorId);
+    const _user = await this.userService.findById(request.user.id);
     if (!_user) {
       throw new HttpException(
         'Не существует такого автора',
@@ -123,11 +131,13 @@ export class NewsController {
     }
     _newsEntity.title = news.title;
     _newsEntity.description = news.description;
-    //_newsEntity.user = _user;
+    _newsEntity.user = _user;
+    _newsEntity.author = `${_user.firstName} ${_user.lastName}`;
     _newsEntity.category = _category;
 
     const _news = await this.newsService.create(_newsEntity);
-    await this.mailService.sendNewNewsForAdmins(['admin@example.com'], _news);
+    const adminEmail = process.env.ADMIN_EMAIL;
+    if (adminEmail) await this.mailService.sendNewNewsForAdmins([adminEmail], _news);
     return _news;
   }
 }

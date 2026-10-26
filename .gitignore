@@ -1,6 +1,9 @@
 # compiled output
 /dist
 /node_modules
+/target
+/metonest.sqlite
+.env
 
 # Logs
 logs

@@ -75,7 +75,9 @@ let NewsController = class NewsController {
         _newsEntity.description = news.description;
         _newsEntity.category = _category;
         const _news = await this.newsService.create(_newsEntity);
-        await this.mailService.sendNewNewsForAdmins(['admin@example.com'], _news);
+        const adminEmail = process.env.ADMIN_EMAIL;
+        if (adminEmail)
+            await this.mailService.sendNewNewsForAdmins([adminEmail], _news);
         return _news;
     }
 };
